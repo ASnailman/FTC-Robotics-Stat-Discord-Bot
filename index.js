@@ -36,11 +36,12 @@ client.on('interactionCreate', async (message) => {
     const {commandName, options} = message;
 
     if (commandName == 'teamstats') {  
-      const commandInput = options.getString('team'); //team argument from global slash command
+      const commandTeamInput = options.getString('team'); //team argument from global slash command
+      const commandRegionInput = options.getString('region');
       await message.deferReply(); // Defer reply if processing takes time
 
       try {
-        const stats = await fetchTeamStats(commandInput);
+        const stats = await fetchTeamStats(commandTeamInput, commandRegionInput);
         await message.editReply(stats); //replay with stats
         // console.log(`Fetched stats: ${stats}`);
         // message.reply(stats);
@@ -54,8 +55,14 @@ client.on('interactionCreate', async (message) => {
   
 
 // funtion for fetching team stats
-async function fetchTeamStats(teamNameOrNumber) {
-    const url = 'http://www.ftcstats.org/2025/index.html';
+async function fetchTeamStats(teamNameOrNumber, region) {
+    const regionType = region.toLowerCase();
+    let url = "";
+    if (regionType == "global") {
+      url = 'http://www.ftcstats.org/2025/index.html';
+    } else {
+      url = `http://www.ftcstats.org/2025/${regionType}.html`;
+    }
 
     try {
         const response = await axios.get(url);
@@ -81,7 +88,7 @@ async function fetchTeamStats(teamNameOrNumber) {
           const bestScore = teamRow.find('td').eq(17).text().trim();
 
           //template literals preserve whitespace
-          stats = `**Team Name:** ${team}\n**Team Number:** ${teamNumber}\n**Current Global Rank:** ${currentRank}\n**Non-Penalty OPR:** ${nonPenaltyOPR}\n**Offensive Power Ranking (OPR):** ${OPR}\n**Avg Score:** ${avgScore}\n**Best Score:** ${bestScore}`;
+          stats = `**Team Name:** ${team}\n**Team Number:** ${teamNumber}\n**Current ${regionType} Rank:** ${currentRank}\n**Non-Penalty OPR:** ${nonPenaltyOPR}\n**Offensive Power Ranking (OPR):** ${OPR}\n**Avg Score:** ${avgScore}\n**Best Score:** ${bestScore}`;
         }
         return stats;
     } catch (error) {

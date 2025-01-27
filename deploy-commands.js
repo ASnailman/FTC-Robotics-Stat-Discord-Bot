@@ -12,6 +12,12 @@ const commands = [
         description: 'Type the name or number of team to get stats', // Description of the argument
         required: true, // Makes this argument mandatory
       },
+      {
+        name: 'region', // Name of the argument
+        type: 3, // Type 3 is a string
+        description: 'Type global or a state to see global/state stats', // Description of the argument
+        required: true, // Makes this argument mandatory
+      }
     ],
   },
 ];
