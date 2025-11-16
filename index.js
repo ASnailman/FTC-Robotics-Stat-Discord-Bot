@@ -71,12 +71,34 @@ async function fetchTeamStats(teamNameOrNumber, region, year) {
           const OPR = teamRow.find('td').eq(4).text().trim();;
           const avgScore = teamRow.find('td').eq(15).text().trim();;
           const bestScore = teamRow.find('td').eq(17).text().trim();
-
+        
+          const totalTeams = $('tr.trow').length;
           stats = `**Team Name:** ${team}\n**Team Number:** ${teamNumber}\n**Current ${regionType.toUpperCase()} Rank:** ${currentRank}\n**Non-Penalty OPR:** ${nonPenaltyOPR}\n**Offensive Power Ranking (OPR):** ${OPR}\n**Avg Score:** ${avgScore}\n**Best Score:** ${bestScore}`;
+          const analysis = analyzeTeamPerformance({
+            team, teamNumber, rank: currentRank, nonPenaltyOPR, OPR, avgScore, bestScore, totalTeams
+          }, regionType);
+
+          stats += '\n\n' + analysis;
+        
         }
         return stats;
     } catch (error) {
         console.error('Error fetching team stats:', error.message);
         throw new Error('Failed to fetch team stats.');
     }
+}
+
+function analyzeTeamPerformance(teamData, regionType = 'global') {
+  const { rank, totalTeams } = teamData;
+  const teams = totalTeams || 0;
+
+  if (!teams || !rank) {
+    return `• Rank: ${rank ?? 'unknown'}/${teams || 'unknown'}`;
+  }
+
+  // preserve previous calculation/format you liked
+  const rankPct = Math.round((1 - (rank - 1) / teams) * 100);
+  const displayPct = 100 - rankPct;
+
+  return `• You are roughly in the top ${displayPct}% of ${regionType.toUpperCase()} teams (rank ${rank}/${teams}).`;
 }
